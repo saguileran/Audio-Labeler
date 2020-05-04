@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>wavesurfer.js | Annotation tool</title>
+        <title>Audio Anotador</title>
 
         <link href="data:image/gif;" rel="icon" type="image/x-icon" />
         
@@ -30,11 +30,12 @@
     <body itemscope itemtype="http://schema.org/WebApplication">
         <div class="container">
             <div class="header">
-                <ul class="nav nav-pills pull-right">
+                <!-- Home button
+		<ul class="nav nav-pills pull-right">
                     <li><a href="/"><i class="glyphicon glyphicon-home"></i></a></li>
                 </ul>
-
-                <h1 itemprop="name">wavesurfer.js Annotations Tool</h1>
+		-->
+                <h1 itemprop="name">Audio Anotador</h1>
             </div>
 
             <div id="demo">
@@ -49,8 +50,8 @@
                 <div class="row" style="margin: 30px 0">
                     <div class="col-sm-8">
                         <p>
-                            Click on a region to enter an annotation.<br />
-                            Shift-click plays a region in a loop.
+                            Clic en una región para ingresar una etiqueta<br />
+                            Con clic izquierdo sobre una región esta se reprouce
                         </p>
                     </div>
 
@@ -71,7 +72,7 @@
                     <div class="col-sm-2">
                         <button class="btn btn-info btn-block" data-action="export" title="Export annotations to JSON">
                             <i class="glyphicon glyphicon-file"></i>
-                            Export
+                            Exportar
                         </button>
                     </div>
                 </div>
@@ -79,17 +80,17 @@
 
             <form role="form" name="edit" style="opacity: 0; transition: opacity 300ms linear; margin: 30px 0;">
                 <div class="form-group">
-                    <label for="start">Start</label>
+                    <label for="start">Inicio</label>
                     <input class="form-control" id="start" name="start" />
                 </div>
 
                 <div class="form-group">
-                    <label for="end">End</label>
+                    <label for="end">Final</label>
                     <input class="form-control" id="end" name="end" />
                 </div>
 
                 <div class="form-group">
-                    <label for="note">Note</label>
+                    <label for="note">Nota</label>
                     <textarea id="note" class="form-control" rows="3" name="note"></textarea>
                 </div>
 
@@ -108,17 +109,12 @@
                     <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">wavesurfer.js</span> by <a href="https://github.com/katspaugh/wavesurfer.js">katspaugh</a> is licensed under a <a rel="license" href="https://opensource.org/licenses/BSD-3-Clause">BSD-3-Clause License</a>.
                 </div>
 
-                <div class="col-sm-4">
-                    <p>
-                        The sound file is from <a href="https://librivox.org/librivox-multilingual-short-works-collection-001-by-various/">librivox.org</a>.
-                    </p>
-                </div>
             </div>
         </div>
 
         <div class="github-fork-ribbon-wrapper right">
             <div class="github-fork-ribbon">
-                <a itemprop="isBasedOnUrl" href="https://github.com/katspaugh/wavesurfer.js">Fork me on GitHub</a>
+                <a itemprop="isBasedOnUrl" href="https://github.com/katspaugh/wavesurfer.js">Wavesurfer.js</a>
             </div>
         </div>
 

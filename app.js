@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .on('success', function(data) {
             wavesurfer.load(
-                "Theme.mp3",
+                "PLG07_20190712_013000.WAV",
                 data
             );
         });
