@@ -2,136 +2,123 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>Audio Anotador | wavesurfer.js</title>
+        <title>wavesurfer.js | Annotation tool</title>
 
         <link href="data:image/gif;" rel="icon" type="image/x-icon" />
-
+        
         <!-- Bootstrap -->
         <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
 
         <link rel="stylesheet" href="Wavesurfer/css/style.css" />
         <link rel="stylesheet" href="Wavesurfer/css/ribbon.css" />
-
-        <link rel="screenshot" itemprop="screenshot" href="//katspaugh.github.io/wavesurfer.js/example/screenshot.png" />
+        <link rel="stylesheet" href="app.css" />
+        <link rel="screenshot" itemprop="screenshot" href="https://katspaugh.github.io/wavesurfer.js/example/screenshot.png" />
 
         <!-- wavesurfer.js -->
         <script src="https://unpkg.com/wavesurfer.js"></script>
 
         <!-- plugins -->
         <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.timeline.js"></script>
-	<script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.minimap.js"></script>
-	<script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.js"></script>
-	<script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.elan.js"></script>
         <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.js"></script>
-        <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.spectrogram.js"></script>
+        <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.minimap.js"></script>
 
         <!-- App -->
-        <script src="app.js"></script>
         <script src="Wavesurfer/trivia.js"></script>
-
-        <!-- highlight.js for syntax highlighting in this example -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/default.min.css">
-        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script>
-
-        <!-- Styling information for the elan plugin -->
-        <style type="text/css">
-        #annotations {
-            max-height: 400px;
-            overflow: auto;
-        }
-
-        .wavesurfer-annotations tr.wavesurfer-active td {
-            background-color: yellow;
-        }
-
-        .wavesurfer-time {
-            width: 100px;
-            color: #555;
-        }
-
-        .wavesurfer-tier-Text {
-            width: 500px;
-        }
-
-        td.wavesurfer-tier-Comments {
-            color: #999;
-        }
-
-        .wavesurfer-handle {
-            background-color: #c9e2b3;
-        }
-        </style>
+        <script src="app.js"></script>
     </head>
 
     <body itemscope itemtype="http://schema.org/WebApplication">
         <div class="container">
             <div class="header">
-                <noindex>
                 <ul class="nav nav-pills pull-right">
-                    <li><a href="?fill">Fill</a></li>
-                    <li><a href="?scroll">Scroll</a></li>
+                    <li><a href="/"><i class="glyphicon glyphicon-home"></i></a></li>
                 </ul>
-                </noindex>
 
-                <h1 itemprop="name">Audio Anotador - Wavesurfer.js</h1>
+                <h1 itemprop="name">wavesurfer.js Annotations Tool</h1>
             </div>
 
             <div id="demo">
-                <div id="waveform">
-                    <div class="progress progress-striped active" id="progress-bar">
-                        <div class="progress-bar progress-bar-info"></div>
-                    </div>
+                <p id="subtitle" class="text-center text-info">&nbsp;</p>
 
+                <div id="wave-timeline"></div>
+
+                <div id="waveform">
                     <!-- Here be waveform -->
                 </div>
-                <div id="wave-timeline"></div>
-		<div id="wave-spectrogram"></div>
-                <div id="annotations"></div>
 
-                <div class="controls">
-		    <button class="btn btn-primary" data-action="play">
-                        <i class="glyphicon glyphicon-play"></i>
-                        Play
-                        /
-                        <i class="glyphicon glyphicon-pause"></i>
-                        Pause
-                    </button>
+                <div class="row" style="margin: 30px 0">
+                    <div class="col-sm-8">
+                        <p>
+                            Click on a region to enter an annotation.<br />
+                            Shift-click plays a region in a loop.
+                        </p>
+                    </div>
+
+                    <div class="col-sm-2">
+                        <button class="btn btn-primary btn-block" data-action="play">
+                            <span id="play">
+                                <i class="glyphicon glyphicon-play"></i>
+                                Play
+                            </span>
+
+                            <span id="pause" style="display: none">
+                                <i class="glyphicon glyphicon-pause"></i>
+                                Pause
+                            </span>
+                        </button>
+                    </div>
+
+                    <div class="col-sm-2">
+                        <button class="btn btn-info btn-block" data-action="export" title="Export annotations to JSON">
+                            <i class="glyphicon glyphicon-file"></i>
+                            Export
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-lg-4">
-					<div class="form-group marketing">
-                        <h4>Disable and enable plugins on the fly:</h4>
-                        <hr />
-						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="minimap">Minimap</label>
-						</div>
-						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="spectrogram">Spectrogram</label>
-						</div>
-						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="regions">Regions</label>
-						</div>
-					</div>
+            <form role="form" name="edit" style="opacity: 0; transition: opacity 300ms linear; margin: 30px 0;">
+                <div class="form-group">
+                    <label for="start">Start</label>
+                    <input class="form-control" id="start" name="start" />
                 </div>
-                
+
+                <div class="form-group">
+                    <label for="end">End</label>
+                    <input class="form-control" id="end" name="end" />
+                </div>
+
+                <div class="form-group">
+                    <label for="note">Note</label>
+                    <textarea id="note" class="form-control" rows="3" name="note"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block">Save</button>
+                <center><i>or</i></center>
+                <button type="button" class="btn btn-danger btn-block" data-action="delete-region">Delete</button>
+            </form>
+
+
             <div class="footer row">
                 <div class="col-sm-12">
                     <a rel="license" href="https://opensource.org/licenses/BSD-3-Clause"><img alt="BSD-3-Clause License" style="border-width:0" src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
                 </div>
 
-                <div class="col-sm-12">
-                    <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">wavesurfer.js</span> by <a href="https://github.com/katspaugh/wavesurfer.js">katspaugh</a> is licensed under a&nbsp;<a style="white-space: nowrap" rel="license" href="https://opensource.org/licenses/BSD-3-Clause">BSD-3-Clause License</a>.
+                <div class="col-sm-8">
+                    <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">wavesurfer.js</span> by <a href="https://github.com/katspaugh/wavesurfer.js">katspaugh</a> is licensed under a <a rel="license" href="https://opensource.org/licenses/BSD-3-Clause">BSD-3-Clause License</a>.
+                </div>
+
+                <div class="col-sm-4">
+                    <p>
+                        The sound file is from <a href="https://librivox.org/librivox-multilingual-short-works-collection-001-by-various/">librivox.org</a>.
+                    </p>
                 </div>
             </div>
-
         </div>
 
         <div class="github-fork-ribbon-wrapper right">
             <div class="github-fork-ribbon">
-                <a itemprop="isBasedOnUrl" href="https://github.com/katspaugh/wavesurfer.js">Wavesurfer.js</a>
+                <a itemprop="isBasedOnUrl" href="https://github.com/katspaugh/wavesurfer.js">Fork me on GitHub</a>
             </div>
         </div>
 

@@ -1,0 +1,243 @@
+'use strict';
+
+var wavesurfer;
+
+// Init & load
+document.addEventListener('DOMContentLoaded', function() {
+
+    var pluginOptions = {
+        minimap: {
+            waveColor: '#777',
+            progressColor: '#222',
+            height: 60
+        },
+        timeline: {
+            container: '#wave-timeline'
+        },
+        spectrogram: {
+            container: '#wave-spectrogram'
+        },
+        cursor: {},
+        regions: {},
+    };
+
+
+    var options = {
+        container: '#waveform',
+        height: 200,
+	normalize: true,
+        waveColor: 'green',
+        progressColor: 'blue',
+        loaderColor: 'green',
+	barWidth: 3,
+        barRadius: 3,
+	cursorWidth: 2,
+        cursorColor: 'navy',
+        plugins: [WaveSurfer.cursor.create(pluginOptions.cursor)]
+    };
+
+
+
+    if (location.search.match('scroll')) {
+        options.minPxPerSec = 100;
+        options.scrollParent = true;
+    }
+
+    if (location.search.match('normalize')) {
+        options.normalize = true;
+    }
+
+    // Init wavesurfer
+    wavesurfer = WaveSurfer.create(options);
+
+    [].forEach.call(
+        document.querySelectorAll('[data-activate-plugin]'),
+        function(el) {
+            var activePlugins = wavesurfer.initialisedPluginList;
+            Object.keys(activePlugins).forEach(function(name) {
+                if (el.dataset.activatePlugin === name) {
+                    el.checked = true;
+                }
+            });
+        }
+    );
+
+    [].forEach.call(
+        document.querySelectorAll('[data-activate-plugin]'),
+        function(el) {
+            el.addEventListener('change', function(e) {
+                var pluginName = e.currentTarget.dataset.activatePlugin;
+                var activate = e.target.checked;
+                var options = pluginOptions[pluginName] || {};
+                var plugin = WaveSurfer[pluginName].create(options);
+
+                if (activate) {
+                    wavesurfer.addPlugin(plugin).initPlugin(pluginName);
+                } else {
+                    wavesurfer.destroyPlugin(pluginName);
+                }
+            });
+        }
+    );
+
+    /* Progress bar */
+    (function() {
+        var progressDiv = document.querySelector('#progress-bar');
+        var progressBar = progressDiv.querySelector('.progress-bar');
+
+        var showProgress = function(percent) {
+            progressDiv.style.display = 'block';
+            progressBar.style.width = percent + '%';
+        };
+
+        var hideProgress = function() {
+            progressDiv.style.display = 'none';
+        };
+
+        wavesurfer.on('loading', showProgress);
+        wavesurfer.on('ready', hideProgress);
+        wavesurfer.on('destroy', hideProgress);
+        wavesurfer.on('error', hideProgress);
+    })();
+
+
+
+
+    /* Regions */
+
+    wavesurfer.on('ready', function() {
+        wavesurfer.enableDragSelection({
+            color: randomColor(0.1)
+        });
+
+        if (localStorage.regions) {
+            loadRegions(JSON.parse(localStorage.regions));
+        } else {
+            // loadRegions(
+            //     extractRegions(
+            //         wavesurfer.backend.getPeaks(512),
+            //         wavesurfer.getDuration()
+            //     )
+            // );
+        }
+    });
+    wavesurfer.on('region-click', function(region, e) {
+        e.stopPropagation();
+        // Play on click, loop on shift click
+        e.shiftKey ? region.playLoop() : region.play();
+    });
+    wavesurfer.on('region-click', editAnnotation);
+    wavesurfer.on('region-updated', saveRegions);
+    wavesurfer.on('region-removed', saveRegions);
+    wavesurfer.on('region-in', showNote);
+
+    wavesurfer.on('region-play', function(region) {
+        region.once('out', function() {
+            wavesurfer.play(region.start);
+            wavesurfer.pause();
+        });
+    });
+
+
+
+
+    wavesurfer.load("Who's Theme.mp3");
+
+});
+
+
+
+
+
+/**
+ * Save annotations to localStorage.
+ */
+function saveRegions() {
+    localStorage.regions = JSON.stringify(
+        Object.keys(wavesurfer.regions.list).map(function(id) {
+            var region = wavesurfer.regions.list[id];
+            return {
+                start: region.start,
+                end: region.end,
+                attributes: region.attributes,
+                data: region.data
+            };
+        })
+    );
+}
+
+
+
+
+/**
+ * Random RGBA color.
+ */
+function randomColor(alpha) {
+    return (
+        'rgba(' +
+        [
+            ~~(Math.random() * 255),
+            ~~(Math.random() * 255),
+            ~~(Math.random() * 255),
+            alpha || 1
+        ] +
+        ')'
+    );
+}
+
+/**
+ * Edit annotation for a region.
+ */
+function editAnnotation(region) {
+    var form = document.forms.edit;
+    form.style.opacity = 1;
+    (form.elements.start.value = Math.round(region.start * 10) / 10),
+        (form.elements.end.value = Math.round(region.end * 10) / 10);
+    form.elements.note.value = region.data.note || '';
+    form.onsubmit = function(e) {
+        e.preventDefault();
+        region.update({
+            start: form.elements.start.value,
+            end: form.elements.end.value,
+            data: {
+                note: form.elements.note.value
+            }
+        });
+        form.style.opacity = 0;
+    };
+    form.onreset = function() {
+        form.style.opacity = 0;
+        form.dataset.region = null;
+    };
+    form.dataset.region = region.id;
+}
+
+/**
+ * Display annotation.
+ */
+function showNote(region) {
+    if (!showNote.el) {
+        showNote.el = document.querySelector('#subtitle');
+    }
+    showNote.el.textContent = region.data.note || '–';
+}
+
+/**
+ * Bind controls.
+ */
+window.GLOBAL_ACTIONS['delete-region'] = function() {
+    var form = document.forms.edit;
+    var regionId = form.dataset.region;
+    if (regionId) {
+        wavesurfer.regions.list[regionId].remove();
+        form.reset();
+    }
+};
+
+window.GLOBAL_ACTIONS['export'] = function() {
+    window.open(
+        'data:application/json;charset=utf-8,' +
+            encodeURIComponent(localStorage.regions)
+    );
+};
+
