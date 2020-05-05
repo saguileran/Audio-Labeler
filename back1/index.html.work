@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>wavesurfer.js | Plugin system</title>
+        <title>Audio Anotador | wavesurfer.js</title>
 
         <link href="data:image/gif;" rel="icon" type="image/x-icon" />
 
@@ -19,14 +19,14 @@
 
         <!-- plugins -->
         <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.timeline.js"></script>
-		<script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.minimap.js"></script>
-		<script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.js"></script>
+	<script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.minimap.js"></script>
+	<script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.cursor.js"></script>
+	<script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.elan.js"></script>
         <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.regions.js"></script>
         <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.spectrogram.js"></script>
 
         <!-- App -->
-        <!-- Defining app.js as a module allows you to use 'import' statement, to import CursorCustomPlugin -->
-        <script type="module" src="app.js"></script>
+        <script src="app.js"></script>
         <script src="Wavesurfer/trivia.js"></script>
 
         <!-- highlight.js for syntax highlighting in this example -->
@@ -37,7 +37,7 @@
         <!-- Styling information for the elan plugin -->
         <style type="text/css">
         #annotations {
-            max-height: 300px;
+            max-height: 400px;
             overflow: auto;
         }
 
@@ -74,7 +74,7 @@
                 </ul>
                 </noindex>
 
-                <h1 itemprop="name"><a href="http://wavesurfer-js.org">wavesurfer.js</a><noindex> Plugin system</noindex></h1>
+                <h1 itemprop="name">Audio Anotador V1 - Wavesurfer.js</h1>
             </div>
 
             <div id="demo">
@@ -86,11 +86,17 @@
                     <!-- Here be waveform -->
                 </div>
                 <div id="wave-timeline"></div>
-				<div id="wave-spectrogram"></div>
+		<div id="wave-spectrogram"></div>
                 <div id="annotations"></div>
 
                 <div class="controls">
-
+		    <button class="btn btn-primary" data-action="play">
+                        <i class="glyphicon glyphicon-play"></i>
+                        Play
+                        /
+                        <i class="glyphicon glyphicon-pause"></i>
+                        Pause
+                    </button>
                 </div>
             </div>
 
@@ -103,23 +109,15 @@
   							<label><input type="checkbox" value="" data-activate-plugin="minimap">Minimap</label>
 						</div>
 						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="timeline">Timeline</label>
-						</div>
-                        <div class="checkbox">
-                            <label><input type="checkbox" value="" data-activate-plugin="cursor">CursorCustom</label>
-                        </div>
-						<div class="checkbox">
   							<label><input type="checkbox" value="" data-activate-plugin="spectrogram">Spectrogram</label>
 						</div>
 						<div class="checkbox">
   							<label><input type="checkbox" value="" data-activate-plugin="regions">Regions</label>
 						</div>
-						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="elan">Elan</label>
-						</div>
 					</div>
                 </div>
-                            <div class="footer row">
+                
+            <div class="footer row">
                 <div class="col-sm-12">
                     <a rel="license" href="https://opensource.org/licenses/BSD-3-Clause"><img alt="BSD-3-Clause License" style="border-width:0" src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
                 </div>
@@ -133,7 +131,7 @@
 
         <div class="github-fork-ribbon-wrapper right">
             <div class="github-fork-ribbon">
-                <a itemprop="isBasedOnUrl" href="https://github.com/katspaugh/wavesurfer.js">Fork me on GitHub</a>
+                <a itemprop="isBasedOnUrl" href="https://github.com/katspaugh/wavesurfer.js">Wavesurfer.js</a>
             </div>
         </div>
 
