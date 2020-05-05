@@ -18,7 +18,16 @@ document.addEventListener('DOMContentLoaded', function() {
         spectrogram: {
             container: '#wave-spectrogram'
         },
-        cursor: {},
+        cursor: {
+	    showTime: true,
+            opacity: 1,
+            customShowTimeStyle: {
+                'background-color': '#000',
+                color: '#fff',
+                padding: '2px',
+                'font-size': '10px'
+	    },
+	},
         regions: {
             regions: [
                 {
@@ -121,4 +130,67 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
 
     wavesurfer.load("Audios/Who's Theme.mp3");
+
+    // controls
+    document
+        .querySelector('[data-action="play"]')
+        .addEventListener('click', wavesurfer.playPause.bind(wavesurfer));
+
+
+    /* Regions */
+
+    wavesurfer.on('ready', function() {
+        wavesurfer.enableDragSelection({
+            color: randomColor(0.1)
+        });
+
+        if (localStorage.regions) {
+            loadRegions(JSON.parse(localStorage.regions));
+        } else {
+            // loadRegions(
+            //     extractRegions(
+            //         wavesurfer.backend.getPeaks(512),
+            //         wavesurfer.getDuration()
+            //     )
+            // );
+            wavesurfer.util
+                .ajax({
+                    responseType: 'json',
+                    url: 'annotations.json'
+                })
+                .on('success', function(data) {
+                    loadRegions(data);
+                    saveRegions();
+                });
+        }
+    });
+    wavesurfer.on('region-click', function(region, e) {
+        e.stopPropagation();
+        // Play on click, loop on shift click
+        e.shiftKey ? region.playLoop() : region.play();
+    });
+    wavesurfer.on('region-click', editAnnotation);
+    wavesurfer.on('region-updated', saveRegions);
+    wavesurfer.on('region-removed', saveRegions);
+    wavesurfer.on('region-in', showNote);
+
+    wavesurfer.on('region-play', function(region) {
+        region.once('out', function() {
+            wavesurfer.play(region.start);
+            wavesurfer.pause();
+        });
+    });
+
+    /* Toggle play/pause buttons. */
+    var playButton = document.querySelector('#play');
+    var pauseButton = document.querySelector('#pause');
+    wavesurfer.on('play', function() {
+        playButton.style.display = 'none';
+        pauseButton.style.display = '';
+    });
+    wavesurfer.on('pause', function() {
+        playButton.style.display = '';
+        pauseButton.style.display = 'none';
+    });
+
 });
