@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>wavesurfer.js | Plugin system</title>
+        <title>Etiquetador de Audio</title>
 
         <link href="data:image/gif;" rel="icon" type="image/x-icon" />
 
@@ -69,12 +69,12 @@
             <div class="header">
                 <noindex>
                 <ul class="nav nav-pills pull-right">
-                    <li><a href="?fill">Fill</a></li>
-                    <li><a href="?scroll">Scroll</a></li>
+                    <li><a href="?fill">Llenar</a></li>
+                    <li><a href="?scroll">Desplazar</a></li>
                 </ul>
                 </noindex>
 
-                <h1 itemprop="name"><a href="http://wavesurfer-js.org">wavesurfer.js</a><noindex> Plugin system</noindex></h1>
+                <h1 itemprop="name">Audio Anotador</a></h1>
             </div>
 
             <div id="demo">
@@ -97,7 +97,7 @@
 		<div class="row" style="margin: 30px 0">
                     <div class="col-sm-8">
                         <p>
-                            Click on a region to enter an annotation.<br />
+                            Para agregar una región dar click on a region to enter an annotation.<br />
                             Shift-click plays a region in a loop.
                         </p>
                     </div>
@@ -119,7 +119,7 @@
                     <div class="col-sm-2">
                         <button class="btn btn-info btn-block" data-action="export" title="Export annotations to JSON">
                             <i class="glyphicon glyphicon-file"></i>
-                            Export
+                            Exportar
                         </button>
                     </div>
                 </div>
@@ -127,7 +127,7 @@
 
             </div>
 
-
+<!--
 	    <form role="form" name="edit" style="opacity: 0; transition: opacity 300ms linear; margin: 30px 0;">
                 <div class="form-group">
                     <label for="start">Start</label>
@@ -149,32 +149,58 @@
                 <button type="button" class="btn btn-danger btn-block" data-action="delete-region">Delete</button>
             </form>
 
+-->
 
-            <div class="row">
+	<div class="row">
                 <div class="col-lg-4">
 					<div class="form-group marketing">
-                        <h4>Disable and enable plugins on the fly:</h4>
+                        <h4>Activar o descactivar plugins::</h4>
                         <hr />
 						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="minimap">Minimap</label>
+  							<label><input type="checkbox" value="" data-activate-plugin="minimap">Minimapa</label>
 						</div>
 						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="timeline">Timeline</label>
+  							<label><input type="checkbox" value="" data-activate-plugin="timeline">Linea de Tiempo</label>
 						</div>
                         <div class="checkbox">
-                            <label><input type="checkbox" value="" data-activate-plugin="cursor">CursorCustom</label>
+                            <label><input type="checkbox" value="" data-activate-plugin="cursor">Cursor</label>
                         </div>
 						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="spectrogram">Spectrogram</label>
+  							<label><input type="checkbox" value="" data-activate-plugin="spectrogram">Espectograma</label>
 						</div>
 						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="regions">Regions</label>
-						</div>
-						<div class="checkbox">
-  							<label><input type="checkbox" value="" data-activate-plugin="elan">Elan</label>
+  							<label><input type="checkbox" value="" data-activate-plugin="regions">Etiquetado</label>
 						</div>
 					</div>
                 </div>
+
+                <div class="col-lg-8">
+
+		<form role="form" name="edit" style="opacity: 0; transition: opacity 300ms linear; margin: 30px 0;">
+                <div class="form-group">
+                    <label for="start">Start</label>
+                    <input class="form-control" id="start" name="start" />
+                </div>
+
+                <div class="form-group">
+                    <label for="end">End</label>
+                    <input class="form-control" id="end" name="end" />
+                </div>
+
+                <div class="form-group">
+                    <label for="note">Note</label>
+                    <textarea id="note" class="form-control" rows="3" name="note"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block">Save</button>
+                <center><i>or</i></center>
+                <button type="button" class="btn btn-danger btn-block" data-action="delete-region">Delete</button>
+            </form>		
+                    </div>
+
+
+
+
                             <div class="footer row">
                 <div class="col-sm-12">
                     <a rel="license" href="https://opensource.org/licenses/BSD-3-Clause"><img alt="BSD-3-Clause License" style="border-width:0" src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" /></a>
@@ -186,13 +212,13 @@
             </div>
 
         </div>
-
+	<!--
         <div class="github-fork-ribbon-wrapper right">
             <div class="github-fork-ribbon">
                 <a itemprop="isBasedOnUrl" href="https://github.com/katspaugh/wavesurfer.js">Fork me on GitHub</a>
             </div>
         </div>
-
+	-->
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

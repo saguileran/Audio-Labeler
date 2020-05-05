@@ -8,7 +8,7 @@ var wavesurfer;
 document.addEventListener('DOMContentLoaded', function() {
     var pluginOptions = {
         minimap: {
-            waveColor: '#777',
+            waveColor: '#277',
             progressColor: '#222',
             height: 30
         },
@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
             container: '#wave-timeline'
         },
         spectrogram: {
-            container: '#wave-spectrogram'
+            container: '#wave-spectrogram',
+	    labels: true
         },
         cursor: {
 	    showTime: true,
@@ -45,22 +46,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             ]
         },
-        elan: {
-            url: '../elan/transcripts/001z.xml',
-            container: '#annotations',
-            tiers: {
-                Text: true,
-                Comments: true
-            }
-        }
     };
     var options = {
         container: '#waveform',
-        waveColor: 'violet',
-        progressColor: 'purple',
+        waveColor: 'gray',
+        progressColor: 'green',
         loaderColor: 'purple',
         cursorColor: 'navy',
-        plugins: [WaveSurfer.timeline.create(pluginOptions.timeline)]
+	normalize: true,
+        plugins: [WaveSurfer.timeline.create(pluginOptions.timeline), WaveSurfer.cursor.create(pluginOptions.cursor)]
     };
 
     if (location.search.match('scroll')) {
@@ -195,3 +189,170 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 });
+
+
+/**
+ * Save annotations to localStorage.
+ */
+function saveRegions() {
+    localStorage.regions = JSON.stringify(
+        Object.keys(wavesurfer.regions.list).map(function(id) {
+            var region = wavesurfer.regions.list[id];
+            return {
+                start: region.start,
+                end: region.end,
+                attributes: region.attributes,
+                data: region.data
+            };
+        })
+    );
+}
+
+/**
+ * Load regions from localStorage.
+ */
+function loadRegions(regions) {
+    regions.forEach(function(region) {
+        region.color = randomColor(0.1);
+        wavesurfer.addRegion(region);
+    });
+}
+
+/**
+ * Extract regions separated by silence.
+ */
+function extractRegions(peaks, duration) {
+    // Silence params
+    var minValue = 0.0015;
+    var minSeconds = 0.25;
+
+    var length = peaks.length;
+    var coef = duration / length;
+    var minLen = minSeconds / coef;
+
+    // Gather silence indeces
+    var silences = [];
+    Array.prototype.forEach.call(peaks, function(val, index) {
+        if (Math.abs(val) <= minValue) {
+            silences.push(index);
+        }
+    });
+
+    // Cluster silence values
+    var clusters = [];
+    silences.forEach(function(val, index) {
+        if (clusters.length && val == silences[index - 1] + 1) {
+            clusters[clusters.length - 1].push(val);
+        } else {
+            clusters.push([val]);
+        }
+    });
+
+    // Filter silence clusters by minimum length
+    var fClusters = clusters.filter(function(cluster) {
+        return cluster.length >= minLen;
+    });
+
+    // Create regions on the edges of silences
+    var regions = fClusters.map(function(cluster, index) {
+        var next = fClusters[index + 1];
+        return {
+            start: cluster[cluster.length - 1],
+            end: next ? next[0] : length - 1
+        };
+    });
+
+    // Add an initial region if the audio doesn't start with silence
+    var firstCluster = fClusters[0];
+    if (firstCluster && firstCluster[0] != 0) {
+        regions.unshift({
+            start: 0,
+            end: firstCluster[firstCluster.length - 1]
+        });
+    }
+
+    // Filter regions by minimum length
+    var fRegions = regions.filter(function(reg) {
+        return reg.end - reg.start >= minLen;
+    });
+
+    // Return time-based regions
+    return fRegions.map(function(reg) {
+        return {
+            start: Math.round(reg.start * coef * 10) / 10,
+            end: Math.round(reg.end * coef * 10) / 10
+        };
+    });
+}
+
+/**
+ * Random RGBA color.
+ */
+function randomColor(alpha) {
+    return (
+        'rgba(' +
+        [
+            ~~(Math.random() * 255),
+            ~~(Math.random() * 255),
+            ~~(Math.random() * 255),
+            alpha || 1
+        ] +
+        ')'
+    );
+}
+
+/**
+ * Edit annotation for a region.
+ */
+function editAnnotation(region) {
+    var form = document.forms.edit;
+    form.style.opacity = 1;
+    (form.elements.start.value = Math.round(region.start * 10) / 10),
+        (form.elements.end.value = Math.round(region.end * 10) / 10);
+    form.elements.note.value = region.data.note || '';
+    form.onsubmit = function(e) {
+        e.preventDefault();
+        region.update({
+            start: form.elements.start.value,
+            end: form.elements.end.value,
+            data: {
+                note: form.elements.note.value
+            }
+        });
+        form.style.opacity = 0;
+    };
+    form.onreset = function() {
+        form.style.opacity = 0;
+        form.dataset.region = null;
+    };
+    form.dataset.region = region.id;
+}
+
+/**
+ * Display annotation.
+ */
+function showNote(region) {
+    if (!showNote.el) {
+        showNote.el = document.querySelector('#subtitle');
+    }
+    showNote.el.textContent = region.data.note || '–';
+}
+
+/**
+ * Bind controls.
+ */
+window.GLOBAL_ACTIONS['delete-region'] = function() {
+    var form = document.forms.edit;
+    var regionId = form.dataset.region;
+    if (regionId) {
+        wavesurfer.regions.list[regionId].remove();
+        form.reset();
+    }
+};
+
+window.GLOBAL_ACTIONS['export'] = function() {
+    window.open(
+        'data:application/json;charset=utf-8,' +
+            encodeURIComponent(localStorage.regions)
+    );
+};
