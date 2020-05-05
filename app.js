@@ -129,7 +129,8 @@ document.addEventListener('DOMContentLoaded', function() {
         wavesurfer.on('error', hideProgress);
     })();
 
-    wavesurfer.load("Audios/Who's Theme.mp3");
+    //wavesurfer.load("Audios/Who's Theme.mp3");
+    wavesurfer.load("Audios/PLG07_20190712_013000.WAV");
 
     // controls
     document

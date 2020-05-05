@@ -127,6 +127,29 @@
 
             </div>
 
+
+	    <form role="form" name="edit" style="opacity: 0; transition: opacity 300ms linear; margin: 30px 0;">
+                <div class="form-group">
+                    <label for="start">Start</label>
+                    <input class="form-control" id="start" name="start" />
+                </div>
+
+                <div class="form-group">
+                    <label for="end">End</label>
+                    <input class="form-control" id="end" name="end" />
+                </div>
+
+                <div class="form-group">
+                    <label for="note">Note</label>
+                    <textarea id="note" class="form-control" rows="3" name="note"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block">Save</button>
+                <center><i>or</i></center>
+                <button type="button" class="btn btn-danger btn-block" data-action="delete-region">Delete</button>
+            </form>
+
+
             <div class="row">
                 <div class="col-lg-4">
 					<div class="form-group marketing">
