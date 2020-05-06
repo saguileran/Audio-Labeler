@@ -1,19 +1,16 @@
-/**
- * Create a WaveSurfer instance.
- */
+'use strict';
+
+//import CursorCustomPlugin from './Wavesurfer/CursorCustomPlugin.js';
+
 var wavesurfer;
 
-/**
- * Init & load.
- */
+// Init & load
 document.addEventListener('DOMContentLoaded', function() {
-    // Init wavesurfer
-var pluginOptions = {
+    var pluginOptions = {
         minimap: {
-            height: 30,
-            waveColor: '#ddd',
-            progressColor: '#999',
-            cursorColor: '#999'
+            waveColor: '#277',
+            progressColor: '#222',
+            height: 30
         },
         timeline: {
             container: '#wave-timeline'
@@ -32,20 +29,33 @@ var pluginOptions = {
                 'font-size': '10px'
 	    },
 	},
-        regions: {},
+        regions: {
+            regions: [
+                {
+                    start: 1,
+                    end: 3,
+                    color: 'hsla(400, 100%, 30%, 0.5)'
+                },
+                {
+                    start: 4,
+                    end: 5.4
+                },
+                {
+                    start: 6.22,
+                    end: 7.1
+                }
+            ]
+        },
     };
     var options = {
         container: '#waveform',
-        height: 100,
-        pixelRatio: 1,
-        //scrollParent: true,
-        //normalize: true,
-        minimap: true,
-        backend: 'MediaElement',
-	    normalize: true,
+        waveColor: 'gray',
+        progressColor: 'green',
+        loaderColor: 'purple',
+        cursorColor: 'navy',
+	normalize: true,
         plugins: [WaveSurfer.timeline.create(pluginOptions.timeline), WaveSurfer.cursor.create(pluginOptions.cursor)]
     };
-
 
     if (location.search.match('scroll')) {
         options.minPxPerSec = 100;
@@ -56,24 +66,71 @@ var pluginOptions = {
         options.normalize = true;
     }
 
-
     // Init wavesurfer
     wavesurfer = WaveSurfer.create(options);
 
+    [].forEach.call(
+        document.querySelectorAll('[data-activate-plugin]'),
+        function(el) {
+            var activePlugins = wavesurfer.initialisedPluginList;
+            Object.keys(activePlugins).forEach(function(name) {
+                if (el.dataset.activatePlugin === name) {
+                    el.checked = true;
+                }
+            });
+        }
+    );
 
+    [].forEach.call(
+        document.querySelectorAll('[data-activate-plugin]'),
+        function(el) {
+            el.addEventListener('change', function(e) {
+                var pluginName = e.currentTarget.dataset.activatePlugin;
+                var activate = e.target.checked;
+                var options = pluginOptions[pluginName] || {};
+                var plugin;
+                if (pluginName === 'cursorCustom') {
+                    plugin = CursorCustomPlugin.create(options);
+                } else {
+                    plugin = WaveSurfer[pluginName].create(options);
+                }
+                if (activate) {
+                    wavesurfer.addPlugin(plugin).initPlugin(pluginName);
+                } else {
+                    wavesurfer.destroyPlugin(pluginName);
+                }
+            });
+        }
+    );
 
-    wavesurfer.util
-        .fetchFile({
-            responseType: 'json',
-            url: 'rashomon.json'
-        })
-        .on('success', function(data) {
-            wavesurfer.load(
-                //'http://www.archive.org/download/mshortworks_001_1202_librivox/msw001_03_rashomon_akutagawa_mt_64kb.mp3',
-		'Audios/PLG07_20190712_013000.WAV',
-                data
-            );
-        });
+    /* Progress bar */
+    (function() {
+        var progressDiv = document.querySelector('#progress-bar');
+        var progressBar = progressDiv.querySelector('.progress-bar');
+
+        var showProgress = function(percent) {
+            progressDiv.style.display = 'block';
+            progressBar.style.width = percent + '%';
+        };
+
+        var hideProgress = function() {
+            progressDiv.style.display = 'none';
+        };
+
+        wavesurfer.on('loading', showProgress);
+        wavesurfer.on('ready', hideProgress);
+        wavesurfer.on('destroy', hideProgress);
+        wavesurfer.on('error', hideProgress);
+    })();
+
+    //wavesurfer.load("Audios/Who's Theme.mp3");
+    wavesurfer.load("Audios/PLG07_20190712_013000.WAV");
+
+    // controls
+    document
+        .querySelector('[data-action="play"]')
+        .addEventListener('click', wavesurfer.playPause.bind(wavesurfer));
+
 
     /* Regions */
 
@@ -130,7 +187,9 @@ var pluginOptions = {
         playButton.style.display = '';
         pauseButton.style.display = 'none';
     });
+
 });
+
 
 /**
  * Save annotations to localStorage.
