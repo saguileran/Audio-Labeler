@@ -8,6 +8,7 @@ var wavesurfer;
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Init wavesurfer
+    /*
     wavesurfer = WaveSurfer.create({
         container: '#waveform',
         height: 100,
@@ -29,6 +30,49 @@ document.addEventListener('DOMContentLoaded', function() {
             })
         ]
     });
+    */
+
+
+    var pluginOptions = {
+        minimap: {
+            waveColor: '#777',
+            progressColor: '#222',
+            height: 30
+        },
+        timeline: {
+            container: '#wave-timeline'
+        },
+        spectrogram: {
+            container: '#wave-spectrogram'
+        },
+        cursorCustom: {},
+        regions: {},
+    };
+    var options = {
+        container: '#waveform',
+        height: 200,
+	normalize: true,
+        waveColor: 'gray',
+        progressColor: 'green',
+        loaderColor: 'green',
+        cursorColor: 'navy',
+        minimap: true,
+        backend: 'MediaElement',
+        plugins: [WaveSurfer.minimap.create(pluginOptions.minimap), WaveSurfer.regions.create(pluginOptions.regions)]
+    };
+
+    if (location.search.match('scroll')) {
+        options.minPxPerSec = 100;
+        options.scrollParent = true;
+    }
+
+    if (location.search.match('normalize')) {
+        options.normalize = true;
+    }
+
+    // Init wavesurfer
+    wavesurfer = WaveSurfer.create(options);
+
 
     wavesurfer.util
         .fetchFile({
