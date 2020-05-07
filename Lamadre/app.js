@@ -8,27 +8,59 @@ var wavesurfer;
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Init wavesurfer
-    wavesurfer = WaveSurfer.create({
+var pluginOptions = {
+        minimap: {
+            height: 30,
+            waveColor: '#ddd',
+            progressColor: '#999',
+            cursorColor: '#999'
+        },
+        timeline: {
+            container: '#wave-timeline'
+        },
+        spectrogram: {
+            container: '#wave-spectrogram',
+	    labels: true
+        },
+        cursor: {
+	    showTime: true,
+            opacity: 1,
+            customShowTimeStyle: {
+                'background-color': '#000',
+                color: '#fff',
+                padding: '2px',
+                'font-size': '10px'
+	    },
+	},
+        regions: {},
+    };
+    var options = {
         container: '#waveform',
         height: 100,
         pixelRatio: 1,
-        scrollParent: true,
-        normalize: true,
+        //scrollParent: true,
+        //normalize: true,
         minimap: true,
         backend: 'MediaElement',
-        plugins: [
-            WaveSurfer.regions.create(),
-            WaveSurfer.minimap.create({
-                height: 30,
-                waveColor: '#ddd',
-                progressColor: '#999',
-                cursorColor: '#999'
-            }),
-            WaveSurfer.timeline.create({
-                container: '#wave-timeline'
-            })
-        ]
-    });
+	    normalize: true,
+        plugins: [WaveSurfer.timeline.create(pluginOptions.timeline), WaveSurfer.cursor.create(pluginOptions.cursor)]
+    };
+
+
+    if (location.search.match('scroll')) {
+        options.minPxPerSec = 100;
+        options.scrollParent = true;
+    }
+
+    if (location.search.match('normalize')) {
+        options.normalize = true;
+    }
+
+
+    // Init wavesurfer
+    wavesurfer = WaveSurfer.create(options);
+
+
 
     wavesurfer.util
         .fetchFile({
@@ -38,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .on('success', function(data) {
             wavesurfer.load(
                 //'http://www.archive.org/download/mshortworks_001_1202_librivox/msw001_03_rashomon_akutagawa_mt_64kb.mp3',
-                'Audios/Theme.mp3',
+		'Audios/PLG07_20190712_013000.WAV',
                 data
             );
         });
