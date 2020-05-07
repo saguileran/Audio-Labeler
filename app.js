@@ -45,12 +45,21 @@ document.addEventListener('DOMContentLoaded', function() {
         spectrogram: {
             container: '#wave-spectrogram'
         },
-        cursorCustom: {},
+        cursor: {
+	showTime: true,
+            opacity: 1,
+            customShowTimeStyle: {
+                'background-color': '#000',
+                color: '#fff',
+                padding: '1px',
+                'font-size': '10px'
+            }
+	},
         regions: {},
     };
     var options = {
         container: '#waveform',
-        height: 200,
+        height: 150,
 	normalize: true,
         waveColor: 'gray',
         progressColor: 'green',
@@ -58,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cursorColor: 'navy',
         minimap: true,
         backend: 'MediaElement',
-        plugins: [WaveSurfer.minimap.create(pluginOptions.minimap), WaveSurfer.regions.create(pluginOptions.regions)]
+        plugins: [WaveSurfer.timeline.create(pluginOptions.timeline), WaveSurfer.regions.create(pluginOptions.regions), WaveSurfer.cursor.create(pluginOptions.cursor)]
     };
 
     if (location.search.match('scroll')) {
@@ -72,6 +81,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Init wavesurfer
     wavesurfer = WaveSurfer.create(options);
+
+
+    [].forEach.call(
+        document.querySelectorAll('[data-activate-plugin]'),
+        function(el) {
+            var activePlugins = wavesurfer.initialisedPluginList;
+            Object.keys(activePlugins).forEach(function(name) {
+                if (el.dataset.activatePlugin === name) {
+                    el.checked = true;
+                }
+            });
+        }
+    );
+
+    [].forEach.call(
+        document.querySelectorAll('[data-activate-plugin]'),
+        function(el) {
+            el.addEventListener('change', function(e) {
+                var pluginName = e.currentTarget.dataset.activatePlugin;
+                var activate = e.target.checked;
+                var options = pluginOptions[pluginName] || {};
+                var plugin;
+                if (pluginName === 'cursorCustom') {
+                    plugin = CursorCustomPlugin.create(options);
+                } else {
+                    plugin = WaveSurfer[pluginName].create(options);
+                }
+                if (activate) {
+                    wavesurfer.addPlugin(plugin).initPlugin(pluginName);
+                } else {
+                    wavesurfer.destroyPlugin(pluginName);
+                }
+            });
+        }
+    );
+
+
+
+    /* Progress bar */
+    (function() {
+        var progressDiv = document.querySelector('#progress-bar');
+        var progressBar = progressDiv.querySelector('.progress-bar');
+
+        var showProgress = function(percent) {
+            progressDiv.style.display = 'block';
+            progressBar.style.width = percent + '%';
+        };
+
+        var hideProgress = function() {
+            progressDiv.style.display = 'none';
+        };
+
+        wavesurfer.on('loading', showProgress);
+        wavesurfer.on('ready', hideProgress);
+        wavesurfer.on('destroy', hideProgress);
+        wavesurfer.on('error', hideProgress);
+    })();
 
 
     wavesurfer.util
